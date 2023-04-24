@@ -10,16 +10,16 @@ import mysql.connector
 def create_connection():
     connection = mysql.connector.connect(
         user='root',
-        password='passwd',
+        password='09218692170',
         host='localhost',
-        database='dataentry_db'
+        database='t2_drw'
     )
     return connection
 
 
 def insert_data(connection, title, title_tokens, source):
     cursor = connection.cursor()
-    ins_title = f'INSERT IGNORE INTO t2_drw.title (name, source) VALUES ("{title}", "{source}");'
+    ins_title = f'INSERT IGNORE INTO db.title (name, source) VALUES ("{title}", "{source}");'
     print(ins_title)
     cursor.execute(ins_title)
     for token in title_tokens:
@@ -51,7 +51,6 @@ def html_to_text(html_file):
 # mayoclinic folder is already Text-Only ready.
 def surf_source_path(folder_path, source):
     connection = create_connection()
-    stop_words = set(stopwords.words('english'))
     irrelevant_strings = ['href=', 'class=', 'id=', '&l', 'symptom']
     for filename in os.listdir(folder_path):
         if filename.endswith(".text"):
@@ -63,12 +62,13 @@ def surf_source_path(folder_path, source):
                 elif source == 'mayoclinic':
                     title = filename[:-5].lower()
                     text = f.read()
-            title_tokens = tokenization(text, stop_words, irrelevant_strings)
+            title_tokens = tokenization(text, irrelevant_strings)
             print(title_tokens)
             insert_data(connection, title, title_tokens, source)
 
 
-def tokenization(text, stop_words, irrelevant_strings):
+def tokenization(text, irrelevant_strings):
+    stop_words = set(stopwords.words('english'))
     rm_char = ['"', '(', ')', ':', ';', '.', '—', ',']
     for char in rm_char:
         text = text.replace(char, '')
@@ -85,7 +85,7 @@ def main():
     source_ls = ['', 'mayoclinic', 'webmd']
     choice = input('1 - mayoclinic \n2 - webmd \ninput: ')
     paths = [
-        '', '"""mayoclinic os dir"""', '"""webmd os dir"""']
+        '', 'mayoclinic dir', 'webmd dir']
     path_choice = input(
         f'Given paths:\n1: {paths[1]}\n2: {paths[2]}\npath: ')
     if choice == '1':
